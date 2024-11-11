@@ -86,8 +86,57 @@ const validateProduct = (product) => {
   return schema.validate(product);
 };
 
+
+// Products API
+let products = {
+  "rings": [
+    { _id: 1, category: "Rings", img_name: "proj_imgs/products/r1.jpg", description: "(Diamonds, White Gold)", details: ["Size 6", "18k White Gold", "0.5 Carats"], price: 1200, brand: "Paramount Jewelers" },
+    { _id: 2, category: "Rings", img_name: "proj_imgs/products/r2.jpg", description: "(Diamonds, White Gold)", details: ["Size 7", "18k White Gold", "0.75 Carats"], price: 1500, brand: "Paramount Jewelers" },
+    { _id: 3, category: "Rings", img_name: "proj_imgs/products/r3.jpg", description: "(Diamonds, White Gold)", details: ["Size 8", "18k White Gold", "1.0 Carats"], price: 2000, brand: "Paramount Jewelers" },
+    { _id: 4, category: "Rings", img_name: "proj_imgs/products/r4.jpg", description: "(Diamonds, White Gold)", details: ["Size 9", "18k White Gold", "1.25 Carats"], price: 2500, brand: "Paramount Jewelers" },
+    { _id: 5, category: "Rings", img_name: "proj_imgs/products/r5.jpg", description: "(Diamonds, White Gold)", details: ["Size 10", "18k White Gold", "1.5 Carats"], price: 3000, brand: "Paramount Jewelers" }
+  ],
+
+  "necklaces": [
+    { _id: 6, category: "Necklaces", img_name: "proj_imgs/products/chain-rope.jpg", description: "Rope Necklace (Gold)", details: ["20 inches", "18k Gold", "15g"], price: 800, brand: "Paramount Jewelers" },
+    { _id: 7, category: "Necklaces", img_name: "proj_imgs/products/chain-cuban1.jpg", description: "Cuban Link Necklace, Thick (Gold)", details: ["24 inches", "18k Gold", "50g"], price: 2000, brand: "Paramount Jewelers" },
+    { _id: 8, category: "Necklaces", img_name: "proj_imgs/products/chain-cuban2.jpg", description: "Cuban Link Necklace, Thin (Gold)", details: ["22 inches", "18k Gold", "30g"], price: 1500, brand: "Paramount Jewelers" },
+    { _id: 9, category: "Necklaces", img_name: "proj_imgs/products/chain-cuban-silver.jpg", description: "Cuban Link Necklace (Silver)", details: ["22 inches", "Sterling Silver", "25g"], price: 700, brand: "Paramount Jewelers" },
+    { _id: 10, category: "Necklaces", img_name: "proj_imgs/products/chain-figaro.jpg", description: "Figaro Link Necklace (Silver)", details: ["20 inches", "Sterling Silver", "20g"], price: 650, brand: "Paramount Jewelers" }
+  ],
+
+  "bracelets": [
+    { _id: 11, category: "Bracelets", img_name: "proj_imgs/products/bracelet1.jpg", description: "Cuban Link Bracelet (Gold, Diamonds)", details: ["7 inches", "18k Gold", "0.4 Carats"], price: 900, brand: "Paramount Jewelers" },
+    { _id: 12, category: "Bracelets", img_name: "proj_imgs/products/bracelet2.jpg", description: "Butterfly Bracelet (Gold, Diamonds)", details: ["6.5 inches", "18k Gold", "0.3 Carats"], price: 950, brand: "Paramount Jewelers" },
+    { _id: 13, category: "Bracelets", img_name: "proj_imgs/products/bracelet3.jpg", description: "Bracelet (Rose Gold, Diamonds)", details: ["6 inches", "Rose Gold", "0.5 Carats"], price: 1200, brand: "Paramount Jewelers" },
+    { _id: 14, category: "Bracelets", img_name: "proj_imgs/products/bracelet4.jpg", description: "Rope Bracelet (Gold)", details: ["7 inches", "18k Gold", "10g"], price: 700, brand: "Paramount Jewelers" }
+  ],
+
+  "watches": [
+    { _id: 15, category: "Watches", img_name: "proj_imgs/products/daydate1.jpg", description: "Rolex: Daydate (Gold)", details: ["Daydate", "18k Gold", "Water Resistance: 100m"], price: 12000, brand: "Rolex" },
+    { _id: 16, category: "Watches", img_name: "proj_imgs/products/datejust.jpg", description: "Rolex: Datejust (Black, Rose Gold, Diamonds)", details: ["Datejust", "Rose Gold", "0.5 Carats"], price: 15000, brand: "Rolex" },
+    { _id: 17, category: "Watches", img_name: "proj_imgs/products/datejust2.jpg", description: "Rolex: Datejust (Green, Gold, Diamonds)", details: ["Datejust", "Gold", "1.0 Carats"], price: 16000, brand: "Rolex" }
+  ]
+};
+
+// GET: Fetch all products
+app.get("/api/products", (req, res) => {
+  res.send(products);
+});
+
+// GET: Fetch products by category
+app.get("/api/products/:category", (req, res) => {
+  const category = req.params.category;
+  if (!products[category]) {
+    return res.status(404).send("Category not found");
+  }
+  res.send(products[category]);
+});
+
+
 // Start the server
 const port = process.env.PORT || 3002;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
