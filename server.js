@@ -133,6 +133,78 @@ app.get("/api/products/:category", (req, res) => {
   res.send(products[category]);
 });
 
+// POST: Add a new product to a specific category
+app.post("/api/products/:category", (req, res) => {
+  const category = req.params.category;
+
+  if (!products[category]) return res.status(404).send("Category not found");
+
+  const result = validateMainProduct(req.body);
+  if (result.error) {
+    res.status(400).send(result.error.details[0].message);
+    return;
+  }
+
+  const newProduct = {
+    _id: products[category].length + 1,
+    category: category,
+    img_name: req.body.img_name,
+    description: req.body.description,
+    details: req.body.details,
+    price: req.body.price,
+    brand: req.body.brand,
+  };
+
+  products[category].push(newProduct);
+  res.status(201).send(newProduct);
+});
+
+// PUT: Update an existing product by ID in a specific category
+app.put("/api/products/:category/:id", (req, res) => {
+  const category = req.params.category;
+  const id = parseInt(req.params.id);
+
+  if (!products[category]) return res.status(404).send("Category not found");
+
+  const product = products[category].find((p) => p._id === id);
+  if (!product) return res.status(404).send("Product with given ID was not found");
+
+  const result = validateMainProduct(req.body);
+  if (result.error) {
+    res.status(400).send(result.error.details[0].message);
+    return;
+  }
+
+  product.img_name = req.body.img_name;
+  product.description = req.body.description;
+  product.details = req.body.details;
+  product.price = req.body.price;
+  product.brand = req.body.brand;
+
+  res.send(product);
+});
+
+// Validation schema for main products
+const validateMainProduct = (product) => {
+  const schema = Joi.object({
+    img_name: Joi.string().required(),
+    description: Joi.string().min(3).required(),
+    details: Joi.array().items(Joi.string()).required(),
+    price: Joi.number().required(),
+    brand: Joi.string().required(),
+  });
+
+  return schema.validate(product);
+};
+
+
+
+
+
+
+
+
+
 
 // Start the server
 const port = process.env.PORT || 3002;
