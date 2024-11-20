@@ -110,10 +110,22 @@ let products = {
   watches: [
     { _id: 15, category: "Watches", img_name: "proj_imgs/products/daydate1.jpg", description: "Rolex: Daydate (Gold)", details: ["Daydate", "18k Gold", "Water Resistance: 100m"], price: 12000, brand: "Rolex" },
     { _id: 16, category: "Watches", img_name: "proj_imgs/products/datejust.jpg", description: "Rolex: Datejust (Black, Rose Gold, Diamonds)", details: ["Datejust", "Rose Gold", "0.5 Carats"], price: 15000, brand: "Rolex" },
-    { _id: 17, category: "Watches", img_name: "proj_imgs/products/datejust2.jpg", description: "Rolex: Datejust (Green, Gold, Diamonds)", details: ["Datejust", "18k Gold", "0.75 Carats"], price: 18000, brand: "Rolex" },
+    { _id: 17, category: "Watches", img_name: "proj_imgs/products/diamondwatch.jpg", description: "Rolex: Diamond Watch", details: ["Diamond-encrusted", "18k Gold", "0.75 Carats"], price: 18000, brand: "Rolex" },
     { _id: 18, category: "Watches", img_name: "proj_imgs/products/oysterperpetual.jpg", description: "Rolex: Oyster Perpetual (Steel)", details: ["Oyster Perpetual", "Steel", "Water Resistance: 100m"], price: 8000, brand: "Rolex" },
   ],
 };
+
+// GET: Fetch all products by category
+app.get("/api/products", (req, res) => {
+  // Combine all product categories into one array
+  const allProducts = [
+    ...products.rings,
+    ...products.necklaces,
+    ...products.bracelets,
+    ...products.watches,
+  ];
+  res.send(allProducts);
+});
 
 // GET: Fetch all products by category
 app.get("/api/products/:category", (req, res) => {
