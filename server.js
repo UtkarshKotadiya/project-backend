@@ -1,4 +1,4 @@
-const express = require("express");
+const express = require ("express");
 const cors = require("cors");
 const app = express();
 const Joi = require("joi");
@@ -31,13 +31,13 @@ app.get("/api/saleproducts", (req, res) => {
 app.post("/api/saleproducts", (req, res) => {
   const result = validateProduct(req.body);
   if (result.error) {
-    res.status(400).send(result.error.details[0].message);
-    return;
+    return res.status(400).send(result.error.details[0].message);
   }
 
+  const maxId = saleproducts.reduce((max, product) => Math.max(max, product._id), 0);
   const product = {
-    _id: saleproducts.length + 1,
-    src: `proj_imgs/sale/${req.body.src}`, // assuming only the file name is sent in the request body
+    _id: maxId + 1,
+    src: `proj_imgs/sale/${req.body.src}`,
     alt: req.body.alt,
     title: req.body.title,
   };
@@ -46,23 +46,26 @@ app.post("/api/saleproducts", (req, res) => {
   res.status(201).send(product);
 });
 
-// PUT: Update an existing product by ID
+// POST: edit a product
 app.put("/api/saleproducts/:id", (req, res) => {
-  const product = saleproducts.find((p) => p._id === parseInt(req.params.id));
-  if (!product) return res.status(404).send("Product with given ID was not found");
+  console.log(req.body);
+
+  let product = saleproducts.find((p) => p._id === parseInt(req.params.id));
+  if (!product) return res.status(400).send("Product with given ID was not found");
 
   const result = validateProduct(req.body);
+
   if (result.error) {
-    res.status(400).send(result.error.details[0].message);
-    return;
+    return res.status(400).send(result.error.details[0].message);
   }
 
-  product.src = `proj_imgs/sale/${req.body.src}`; // update the file path
+  product.src = `proj_imgs/sale/${req.body.src}`;
   product.alt = req.body.alt;
   product.title = req.body.title;
 
-  res.send(product);
+  res.status(200).send(product);
 });
+
 
 // DELETE: Remove a product by ID
 app.delete("/api/saleproducts/:id", (req, res) => {
@@ -75,7 +78,7 @@ app.delete("/api/saleproducts/:id", (req, res) => {
   res.send(product);
 });
 
-// Validation schema for products
+// Validation schema
 const validateProduct = (product) => {
   const schema = Joi.object({
     src: Joi.string().required(),
@@ -137,20 +140,21 @@ app.get("/api/products/:category", (req, res) => {
 app.post("/api/products/:category", (req, res) => {
   const category = req.params.category;
 
-  if (!products[category]) return res.status(404).send("Category not found");
+  if (!products[category]) {
+    return res.status(404).send("Category not found");
+  }
 
-  const result = validateMainProduct(req.body);
+  const result = validateProduct(req.body);
   if (result.error) {
-    res.status(400).send(result.error.details[0].message);
-    return;
+    return res.status(400).send(result.error.details[0].message);
   }
 
   const newProduct = {
     _id: products[category].length + 1,
-    category: category,
-    img_name: req.body.img_name,
+    category,
+    img_name: `proj_imgs/products/${req.body.img_name}`,
     description: req.body.description,
-    details: req.body.details,
+    details: req.body.details || [],
     price: req.body.price,
     brand: req.body.brand,
   };
@@ -158,6 +162,7 @@ app.post("/api/products/:category", (req, res) => {
   products[category].push(newProduct);
   res.status(201).send(newProduct);
 });
+
 
 // PUT: Update an existing product by ID in a specific category
 app.put("/api/products/:category/:id", (req, res) => {
@@ -204,11 +209,8 @@ const validateMainProduct = (product) => {
 
 
 
-
-
 // Start the server
 const port = process.env.PORT || 3002;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
-
