@@ -2,80 +2,103 @@ const express = require ("express");
 const cors = require("cors");
 const app = express();
 const Joi = require("joi");
+const mongoose = require("mongoose");
+
 
 app.use(express.static("public"));
 app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/index.html");
-});
+// let saleproducts = [
+//   { _id: 1, src: "proj_imgs/sale/pendant-heart.jpg", alt: "Heart Pendant (Gold)", title: "Heart Pendant (Gold)" },
+//   { _id: 2, src: "proj_imgs/sale/pendant-cross.jpg", alt: "Cross Pendant", title: "Cross Pendant" },
+//   { _id: 3, src: "proj_imgs/sale/pendant-LS.jpg", alt: "Last Supper Pendant", title: "Last Supper Pendant" },
+//   { _id: 4, src: "proj_imgs/sale/pendant-W.jpg", alt: "World Pendant", title: "World Pendant" },
+//   { _id: 5, src: "proj_imgs/sale/initial-ring.jpg", alt: "Initial Ring (Gold)", title: "Initial Ring (Gold)" },
+//   { _id: 6, src: "proj_imgs/sale/fancy-ring.jpg", alt: "Fancy Ring (Gold)", title: "Fancy Ring (Gold)" },
+//   { _id: 7, src: "proj_imgs/sale/nugget-ring.jpg", alt: "Nugget Ring (Gold)", title: "Nugget Ring (Gold)" },
+//   { _id: 8, src: "proj_imgs/sale/jesus-ring.jpg", alt: "Jesus Ring (Gold)", title: "Jesus Ring (Gold)" },
+// ];
 
-let saleproducts = [
-  { _id: 1, src: "proj_imgs/sale/pendant-heart.jpg", alt: "Heart Pendant (Gold)", title: "Heart Pendant (Gold)" },
-  { _id: 2, src: "proj_imgs/sale/pendant-cross.jpg", alt: "Cross Pendant", title: "Cross Pendant" },
-  { _id: 3, src: "proj_imgs/sale/pendant-LS.jpg", alt: "Last Supper Pendant", title: "Last Supper Pendant" },
-  { _id: 4, src: "proj_imgs/sale/pendant-W.jpg", alt: "World Pendant", title: "World Pendant" },
-  { _id: 5, src: "proj_imgs/sale/initial-ring.jpg", alt: "Initial Ring (Gold)", title: "Initial Ring (Gold)" },
-  { _id: 6, src: "proj_imgs/sale/fancy-ring.jpg", alt: "Fancy Ring (Gold)", title: "Fancy Ring (Gold)" },
-  { _id: 7, src: "proj_imgs/sale/nugget-ring.jpg", alt: "Nugget Ring (Gold)", title: "Nugget Ring (Gold)" },
-  { _id: 8, src: "proj_imgs/sale/jesus-ring.jpg", alt: "Jesus Ring (Gold)", title: "Jesus Ring (Gold)" },
-];
+mongoose
+  .connect(
+    "mongodb+srv://utkarshkotadiya:ukaflo39@products.hx77n.mongodb.net/?retryWrites=true&w=majority&appName=Products"
+  )
+  .then(() => {
+    console.log("connected to mongodb");
+  })
+  .catch((error) => {
+    console.log("couldn't connect to mongodb", error);
+  });
+
+
+  const productSchema = new mongoose.Schema({
+    src: String,
+    alt: String,
+    title: String,
+  });
+  
+  const Product = mongoose.model("Product", productSchema);
+
+  app.get("/", (req, res) => {
+    res.sendFile(__dirname + "/index.html");
+  });
 
 // GET: Fetch all products
-app.get("/api/saleproducts", (req, res) => {
-  res.send(saleproducts);
+app.get("/api/saleproducts", async (req, res) => {
+  const products = await Product.find();
+  res.send(products);
 });
 
 // POST: Add a new product
-app.post("/api/saleproducts", (req, res) => {
-  const result = validateProduct(req.body);
-  if (result.error) {
-    return res.status(400).send(result.error.details[0].message);
-  }
+app.post("/api/saleproducts", async (req, res) => {
+  const { error } = validateProduct(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
 
-  const maxId = saleproducts.reduce((max, product) => Math.max(max, product._id), 0);
-  const product = {
-    _id: maxId + 1,
+  const product = new Product({
     src: `proj_imgs/sale/${req.body.src}`,
     alt: req.body.alt,
     title: req.body.title,
-  };
+  });
 
-  saleproducts.push(product);
-  res.status(201).send(product);
+  try {
+    const savedProduct = await product.save();
+    res.status(201).send(savedProduct);
+  } catch (err) {
+    res.status(500).send("Error saving the product");
+  }
 });
 
-// POST: edit a product
-app.put("/api/saleproducts/:id", (req, res) => {
-  console.log(req.body);
+// PUT: edit a product
+app.put("/api/saleproducts/:id", async (req, res) => {
+  const { error } = validateProduct(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
 
-  let product = saleproducts.find((p) => p._id === parseInt(req.params.id));
-  if (!product) return res.status(400).send("Product with given ID was not found");
+  try {
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      {
+        src: `proj_imgs/sale/${req.body.src}`,
+        alt: req.body.alt,
+        title: req.body.title,
+      },
+      { new: true, runValidators: true }
+    );
 
-  const result = validateProduct(req.body);
+    if (!updatedProduct)
+      return res.status(404).send("Product with the given ID was not found");
 
-  if (result.error) {
-    return res.status(400).send(result.error.details[0].message);
+    res.send(updatedProduct);
+  } catch (err) {
+    res.status(500).send("Error updating the product");
   }
-
-  product.src = `proj_imgs/sale/${req.body.src}`;
-  product.alt = req.body.alt;
-  product.title = req.body.title;
-
-  res.status(200).send(product);
 });
 
 
 // DELETE: Remove a product by ID
-app.delete("/api/saleproducts/:id", (req, res) => {
-  const product = saleproducts.find((p) => p._id === parseInt(req.params.id));
-  if (!product) return res.status(404).send("Product with given ID was not found");
-
-  const index = saleproducts.indexOf(product);
-  saleproducts.splice(index, 1);
-
-  res.send(product);
+app.delete("/api/saleproducts/:id", async (req, res) => {
+  const deletedProduct = await Product.findByIdAndDelete(req.params.id);
+  res.send(deletedProduct);
 });
 
 // Validation schema
@@ -88,7 +111,6 @@ const validateProduct = (product) => {
 
   return schema.validate(product);
 };
-
 
 // Products API
 let products = {
