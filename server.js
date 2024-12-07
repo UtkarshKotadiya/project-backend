@@ -22,7 +22,7 @@ app.use(express.json());
 
 mongoose
   .connect(
-    "mongodb+srv://utkarshkotadiya:ukaflo39@products.hx77n.mongodb.net/?retryWrites=true&w=majority&appName=Products"
+    "mongodb+srv://utkarshkotadiya:v6Lxbsmb1Vui4NkQ@products.hx77n.mongodb.net/?retryWrites=true&w=majority&appName=Products"
   )
   .then(() => {
     console.log("connected to mongodb");
