@@ -4,21 +4,9 @@ const app = express();
 const Joi = require("joi");
 const mongoose = require("mongoose");
 
-
 app.use(express.static("public"));
 app.use(cors());
 app.use(express.json());
-
-// let saleproducts = [
-//   { _id: 1, src: "proj_imgs/sale/pendant-heart.jpg", alt: "Heart Pendant (Gold)", title: "Heart Pendant (Gold)" },
-//   { _id: 2, src: "proj_imgs/sale/pendant-cross.jpg", alt: "Cross Pendant", title: "Cross Pendant" },
-//   { _id: 3, src: "proj_imgs/sale/pendant-LS.jpg", alt: "Last Supper Pendant", title: "Last Supper Pendant" },
-//   { _id: 4, src: "proj_imgs/sale/pendant-W.jpg", alt: "World Pendant", title: "World Pendant" },
-//   { _id: 5, src: "proj_imgs/sale/initial-ring.jpg", alt: "Initial Ring (Gold)", title: "Initial Ring (Gold)" },
-//   { _id: 6, src: "proj_imgs/sale/fancy-ring.jpg", alt: "Fancy Ring (Gold)", title: "Fancy Ring (Gold)" },
-//   { _id: 7, src: "proj_imgs/sale/nugget-ring.jpg", alt: "Nugget Ring (Gold)", title: "Nugget Ring (Gold)" },
-//   { _id: 8, src: "proj_imgs/sale/jesus-ring.jpg", alt: "Jesus Ring (Gold)", title: "Jesus Ring (Gold)" },
-// ];
 
 mongoose
   .connect(
